@@ -1,7 +1,16 @@
 #!/system/bin/sh
 
-# Language detection: Chinese if locale starts with "zh", otherwise English
-case "$(getprop persist.sys.locale 2>/dev/null || getprop ro.product.locale 2>/dev/null)" in
+# Language detection: Chinese if the system locale starts with "zh", otherwise English.
+LOCALE_VALUE=""
+for _locale_prop in persist.sys.locale ro.product.locale persist.sys.language ro.product.locale.language; do
+    _locale_val=$(getprop "$_locale_prop" 2>/dev/null)
+    if [ -n "$_locale_val" ]; then
+        LOCALE_VALUE="$_locale_val"
+        break
+    fi
+done
+
+case "$LOCALE_VALUE" in
     zh*) LANG_CN=true ;;
     *)   LANG_CN=false ;;
 esac
