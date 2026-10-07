@@ -123,6 +123,25 @@ impl MyModule {
             );
         }
 
+        // 同一包名被多个模板声明时，只有书写顺序最先的那个生效，其余被静默丢弃。
+        // 这是最常见的「配了 A 机型却生效了 B 机型」成因，必须留痕。
+        // 注意：非 debug 下日志级别为 Off，此告警只在 debug = true 时落盘；
+        // 用户侧的主要提示在 WebUI（保存/列表处）。
+        if config.debug {
+            for key in [package_with_user.as_str(), package_name.as_str()] {
+                let claimants = config.conflicting_templates_for_package(key);
+                if claimants.len() > 1 {
+                    warn!(
+                        "Package {key} is claimed by {} templates [{}]; only '{}' takes effect, \
+                         the rest are silently ignored. Assign a package to at most one template.",
+                        claimants.len(),
+                        claimants.join(", "),
+                        claimants[0]
+                    );
+                }
+            }
+        }
+
         let merged = config
             .get_merged_config(&package_with_user)
             .or_else(|| config.get_merged_config(&package_name));

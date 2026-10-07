@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
+use indexmap::IndexMap;
 use serde::Deserialize;
 
 pub const DPI_MIN: u32 = 120;
@@ -321,8 +322,12 @@ pub struct Config {
     #[serde(default)]
     pub debug: bool,
     /// 机型设备模板定义
+    ///
+    /// 用 IndexMap 而非 HashMap：保留 config.toml 中的书写顺序，使
+    /// find_template_for_package 在「同一包名被多个模板声明」时命中确定的
+    /// 那一个（书写顺序靠前者），而不是 HashMap 的进程级随机迭代顺序。
     #[serde(default)]
-    pub templates: HashMap<String, DeviceTemplate>,
+    pub templates: IndexMap<String, DeviceTemplate>,
     /// 应用配置
     #[serde(default)]
     pub apps: Vec<AppConfig>,
@@ -342,10 +347,27 @@ impl Config {
     }
 
     /// 查找包名对应的模板（从模板的 packages 列表中查找）
+    ///
+    /// 多个模板声明同一包名时命中**书写顺序最先**的那一个。Config.templates 是
+    /// IndexMap（配合 toml 的 preserve_order），顺序即 config.toml 中的出现顺序，
+    /// 因此结果是确定的、跨进程一致的——不依赖 HashMap 的随机迭代顺序。
     pub fn find_template_for_package(&self, package_name: &str) -> Option<&DeviceTemplate> {
         self.templates
-            .values()
-            .find(|template| template.packages.iter().any(|pkg| pkg == package_name))
+            .iter()
+            .find(|(_, template)| template.packages.iter().any(|pkg| pkg == package_name))
+            .map(|(_, template)| template)
+    }
+
+    /// 找出所有声明了该包名的模板名（按书写顺序）。
+    ///
+    /// 长度 > 1 表示配置存在歧义：只有第一个会真正生效，其余被静默丢弃。
+    /// 用于诊断日志/告警，调用方可据此提示用户「一个包只应挂一个模板」。
+    pub fn conflicting_templates_for_package(&self, package_name: &str) -> Vec<&str> {
+        self.templates
+            .iter()
+            .filter(|(_, template)| template.packages.iter().any(|pkg| pkg == package_name))
+            .map(|(name, _)| name.as_str())
+            .collect()
     }
 
     /// 获取应用的最终配置（优先查找直接配置，其次查找模板的 packages 列表）

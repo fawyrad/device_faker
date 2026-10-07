@@ -155,6 +155,16 @@ export const messages = {
         export_copy_failed: '复制失败，请手动复制',
         pkg_exists: '该包名已添加',
       },
+      conflict: {
+        banner_title: '包名重复配置',
+        banner_desc:
+          '以下包名被多个模板同时声明，只有排在前面的模板会生效，其余被忽略。请让每个包名只挂一个模板。',
+        label: '重复包名',
+        claimed_by: '被 {names} 同时声明',
+        effective: '生效：{name}',
+        ignored: '忽略：{names}',
+        none: '没有重复配置的包名',
+      },
       labels: {
         packages: '应用包名',
         count_suffix: '个',
@@ -546,6 +556,16 @@ export const messages = {
         export_copy_success: 'Template export copied',
         export_copy_failed: 'Copy failed, please copy manually',
         pkg_exists: 'Package already added',
+      },
+      conflict: {
+        banner_title: 'Duplicate package assignments',
+        banner_desc:
+          'These packages are claimed by multiple templates. Only the template listed first takes effect; the rest are ignored. Assign each package to at most one template.',
+        label: 'Duplicated package',
+        claimed_by: 'Claimed by {names}',
+        effective: 'Effective: {name}',
+        ignored: 'Ignored: {names}',
+        none: 'No duplicated package assignments',
       },
       labels: {
         packages: 'Packages',
@@ -940,6 +960,16 @@ export const messages = {
         export_copy_success: 'Şablon dışa aktarımı kopyalandı',
         export_copy_failed: 'Kopyalama başarısız oldu, lütfen manuel olarak kopyalayın',
         pkg_exists: 'Paket zaten eklendi',
+      },
+      conflict: {
+        banner_title: 'Yinelenen paket atamaları',
+        banner_desc:
+          'Bu paketler birden fazla şablon tarafından kullanılıyor. Yalnızca ilk şablonda geçerli olur, diğerleri yok sayılır. Her paketi en fazla bir şablona atayın.',
+        label: 'Yinelenen paket',
+        claimed_by: 'Şunlar tarafından kullanılıyor: {names}',
+        effective: 'Geçerli: {name}',
+        ignored: 'Yok sayılan: {names}',
+        none: 'Yinelenen paket ataması yok',
       },
       labels: {
         packages: 'Paketler',
